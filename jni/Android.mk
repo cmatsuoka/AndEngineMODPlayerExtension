@@ -9,7 +9,7 @@ include $(LOCAL_PATH)/src/loaders/Makefile
 SRC_SOURCES	:= $(addprefix src/,$(SRC_OBJS))
 LOADERS_SOURCES := $(addprefix src/loaders/,$(LOADERS_OBJS))
 
-LOCAL_MODULE    := xmp-coremod
+LOCAL_MODULE    := coremod-jni
 LOCAL_CFLAGS	:= -O3 -DHAVE_CONFIG_H -I$(LOCAL_PATH)/include/coremod \
 		   -I$(LOCAL_PATH)/src -DLIBXMP_CORE_PLAYER \
 		   -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast

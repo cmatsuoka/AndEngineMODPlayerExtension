@@ -31,20 +31,22 @@ extern const struct format_loader xm_loader;
 extern const struct format_loader mod_loader;
 extern const struct format_loader it_loader;
 extern const struct format_loader s3m_loader;
+extern const struct format_loader st_loader;
 
 extern const struct pw_format *const pw_format[];
 
-const struct format_loader *const format_loader[5] = {
+const struct format_loader *const format_loader[6] = {
 	&xm_loader,
 	&mod_loader,
 #ifndef LIBXMP_CORE_DISABLE_IT
 	&it_loader,
 #endif
 	&s3m_loader,
+	&st_loader,
 	NULL
 };
 
-static const char *_farray[5] = { NULL };
+static const char *_farray[6] = { NULL };
 
 char **format_list()
 {

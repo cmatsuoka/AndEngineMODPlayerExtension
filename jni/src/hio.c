@@ -22,11 +22,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef LIBXMP_CORE_PLAYER
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#endif
 #include <limits.h>
 #include <errno.h>
 #include "common.h"
@@ -304,6 +302,8 @@ HIO_HANDLE *hio_open_fd(int fd, char *mode)
 	return h;
 }
 
+#endif
+
 int hio_stat(HIO_HANDLE *h, struct stat *st)
 {
 	if (HIO_HANDLE_TYPE(h) == HIO_HANDLE_TYPE_FILE) {
@@ -314,6 +314,4 @@ int hio_stat(HIO_HANDLE *h, struct stat *st)
 		return 0;
 	}
 }
-
-#endif
 

@@ -1,5 +1,5 @@
 
-LOADERS	= xm_load.o mod_load.o s3m_load.o it_load.o
+LOADERS	= xm_load.o mod_load.o s3m_load.o it_load.o st_load.o
 
 LOADERS_OBJS	= common.o itsex.o sample.o $(LOADERS)
 LOADERS_DFILES	= Makefile $(LOADERS_OBJS:.o=.c) \

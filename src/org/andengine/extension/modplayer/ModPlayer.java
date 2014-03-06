@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.helllabs.coremod.FrameInfo;
 import org.helllabs.coremod.Module;
 import org.helllabs.coremod.Player;
+import org.helllabs.coremod.Xmp;
+
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -98,28 +100,36 @@ public class ModPlayer {
 		return frameInfo.getTime();
 	}
 
-	public void seek(final int seconds) {
-		player.seekTime(seconds * 1000);
+	public void seek(final int millis) {
+		player.seekTime(millis);
 	}
 
-	public int getPlayTempo() {
+	public int getSpeed() {
 		return frameInfo.getSpeed();
 	}
 
-	public int getPlayBpm() {
+	public int getBpm() {
 		return frameInfo.getBpm();
 	}
 
-	public int getPlayPos() {
+	public int getPosition() {
 		return frameInfo.getPosition();
 	}
 
-	public int getPlayPat() {
+	public int getPattern() {
 		return frameInfo.getPattern();
 	}
 
 	public boolean isPaused() {
 		return paused;
+	}
+	
+	public void setVolume(final int vol) {
+		player.set(Xmp.PLAYER_VOLUME, vol);
+	}
+	
+	public int getVolume() {
+		return player.get(Xmp.PLAYER_VOLUME);
 	}
 }
 

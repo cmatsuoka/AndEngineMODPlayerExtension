@@ -15,13 +15,21 @@ import android.media.AudioTrack;
 public class ModPlayer {
 	private static final int SAMPLING_RATE = 44100;
 
-	private static ModPlayer instance;
 	private final Player player;
 	private Module module;	
 	private final AudioTrack audio;
 	protected boolean paused;
 	private Thread playThread;
 	private FrameInfo frameInfo;
+
+	// Initialization-on-demand holder
+    private static class Holder {
+        static final ModPlayer INSTANCE = new ModPlayer();
+    }
+
+    public static ModPlayer getInstance() {
+        return Holder.INSTANCE;
+    }
 
 	protected ModPlayer() {
 		final int minSize = AudioTrack.getMinBufferSize(SAMPLING_RATE,
@@ -37,18 +45,9 @@ public class ModPlayer {
 		player = new Player();
 	}
 
-	public static ModPlayer getInstance() {
-		if (instance == null) {
-			instance = new ModPlayer();
-			instance.paused = false;
-		}
-		return instance;
-	}
-
-
 	private class PlayRunnable implements Runnable {
 		public void run() {
-			FrameInfo info = new FrameInfo();
+			final FrameInfo info = new FrameInfo();
 
 			while (player.playFrame(info)) {			
 				audio.write(info.getBufferArray(), 0, info.getBufferSize());
@@ -72,6 +71,11 @@ public class ModPlayer {
 	protected void finalize() throws Throwable {
 		player.stop();
 		paused = false;
+		try {
+			playThread.join();
+		} catch (InterruptedException e) {
+			// do nothing
+		}
 		super.finalize();
 	}
 

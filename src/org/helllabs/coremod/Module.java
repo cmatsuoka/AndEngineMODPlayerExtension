@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 
 public class Module {
 
-	private final Player player;	// Xmp player
+	//private final Player player;	// Xmp player
 	private final long ctx;			// Xmp context
 
 	private String name;			// Module title
@@ -41,8 +41,16 @@ public class Module {
 	private int length;				// Module length in patterns
 
 	public static class TestInfo {
-		public String name;
-		public String type;
+		private String name;
+		private String type;
+		
+		public String getName() {
+			return name;
+		};
+		
+		public String getType() {
+			return type;
+		}
 	};
 
 	public static class Sequence {
@@ -115,34 +123,46 @@ public class Module {
 			return flags;
 		}
 		
-		public ByteBuffer getData() {
-			return data;
+		public byte[] getData() {
+			data.clear();
+			final int dataSize = data.remaining();
+			final byte[] dataArray = new byte[dataSize];
+			data.get(dataArray, 0, dataSize);
+			return dataArray;
 		}
 	}
 	
-	
-	public Module(final String path) throws IOException {
-		this(path, new Player());
-	}
-
-	public Module(final String path, final Player player) throws IOException {
-
-		this.player = player;
-		this.ctx = player.getContext();
-
-		final int code = Xmp.loadModule(ctx, path);
-		if (code < 0) {
-			throw new IOException(Xmp.errorString[-code]);
-		}
-
+	public Module(final Player player) {
+		ctx = player.getContext();
 		Xmp.getModData(ctx, this);
 	}
 
-	public Module release() {
-		Xmp.releaseModule(ctx);
-		return this;
+	/**
+	 * Test if a file is a valid module. Testing a file does not affect
+	 * player or module states.
+	 * 
+	 * @param path Pathname of the module to test.
+	 * @return The TestInfo object with module information.
+	 * @throws IOException
+	 */
+	
+	public static TestInfo test(final String path) throws IOException {
+		if (path == null) {
+			throw new IOException("File name is null");
+		}
+		return test(path, null);
 	}
 
+	/**
+	 * Test if a file is a valid module, without creating a new TestInfo object.
+	 * Testing a file does not affect player or module states.
+	 *
+	 * @param path Pathname of the module to test.
+	 * @param info TestInfo object used to retrieve module data if the file is
+	 *   a valid module.
+	 * @return The TestInfo object with module information.
+	 * @throws IOException
+	 */
 	public static TestInfo test(final String path, TestInfo info) throws IOException {
 		if (info == null) {
 			info = new Module.TestInfo();
@@ -157,35 +177,53 @@ public class Module {
 
 		return info;
 	}
-
-	public static TestInfo test(final String path) throws IOException {
-		return test(path, null);
-	}
 	
+	/**
+	 * Retrieve instrument data.
+	 * 
+	 * @param num The number of the instrument to retrieve, starting at 0. 
+	 * @return The corresponding instrument object.
+	 */
 	public Instrument instrumentData(final int num) {
 		final Instrument instrument = new Instrument();
 		return instrumentData(num, instrument);
 	}
 	
+	/**
+	 * Retrieve instrument data, without creating a new Instrument object.
+	 * 
+	 * @param num The number of the instrument to retrieve, starting at 0.
+	 * @param instrument The object to be used to retrieve instrument data.
+	 * @return The corresponding instrument object.
+	 */
 	public Instrument instrumentData(final int num, final Instrument instrument) {
 		Xmp.getInstrumentData(ctx, num, instrument);
 		return instrument;
 	}
 	
+	/**
+	 * Retrieve sample data.
+	 * 
+	 * @param num The number of the sample to retrieve, starting at 0.
+	 * @return The corresponding Sample object.
+	 */
 	public Sample sampleData(final int num) {
 		final Sample sample = new Sample();
 		return sampleData(num, sample);
 	}
 	
+	/**
+	 * Retrieve sample data, without creating a new Sample object.
+	 * 
+	 * @param num The number of the sample to retrieve, starting at 0.
+	 * @param sample The object to be used to retrieve sample data.
+	 * @return The corresponding sample object.
+	 */
 	public Sample sampleData(final int num, final Sample sample) {
 		Xmp.getSampleData(ctx, num, sample);
 		return sample;
 	}
 	
-	public Player getPlayer() {
-		return player;
-	}
-
 	public String getName() {
 		return name;
 	}

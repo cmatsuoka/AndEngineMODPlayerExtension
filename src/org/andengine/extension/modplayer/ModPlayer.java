@@ -3,9 +3,7 @@ package org.andengine.extension.modplayer;
 import java.io.IOException;
 
 import org.helllabs.coremod.FrameInfo;
-import org.helllabs.coremod.Module;
 import org.helllabs.coremod.Player;
-import org.helllabs.coremod.Xmp;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -16,7 +14,6 @@ public class ModPlayer {
 	private static final int SAMPLING_RATE = 44100;
 
 	private final Player player;
-	private Module module;	
 	private final AudioTrack audio;
 	protected boolean paused;
 	private Thread playThread;
@@ -64,7 +61,7 @@ public class ModPlayer {
 
 			player.end();
 			audio.stop();
-			module.release();
+			player.releaseModule();
 		}
 	}
 
@@ -81,7 +78,7 @@ public class ModPlayer {
 
 	public void play(final String file) throws IOException {
 
-		module = new Module(file, player);
+		player.loadModule(file);
 
 		audio.play();
 		player.start();
@@ -129,11 +126,11 @@ public class ModPlayer {
 	}
 	
 	public void setVolume(final int vol) {
-		player.set(Xmp.PLAYER_VOLUME, vol);
+		player.setVolume(vol);
 	}
 	
 	public int getVolume() {
-		return player.get(Xmp.PLAYER_VOLUME);
+		return player.getVolume();
 	}
 }
 

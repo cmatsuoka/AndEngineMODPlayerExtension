@@ -261,6 +261,20 @@ METHOD(jint, loadModule) (JNIEnv *env, jobject obj, jlong ctx, jstring path)
 	const char *filename;
 	int res;
 
+	if (path == NULL) {
+		jclass ex = (*env)->FindClass(env,
+				"java/lang/NullPointerException");
+		(*env)->ThrowNew(env, ex, "File name is null");
+		return -XMP_ERROR_LOAD;
+	}
+
+	if (path == NULL) {
+		jclass ex = (*env)->FindClass(env,
+				"java/lang/NullPointerException");
+		(*env)->ThrowNew(env, ex, "File name is null");
+		return -XMP_ERROR_LOAD;
+	}
+
 	filename = (*env)->GetStringUTFChars(env, path, NULL);
 	res = xmp_load_module((xmp_context)ctx, (char *)filename);
 	(*env)->ReleaseStringUTFChars(env, path, filename);

@@ -37,16 +37,16 @@ public final class Xmp {
 	public static final int FORMAT_MONO = 1 << 2;		// Mix to mono instead of stereo
 
 	// mixer paramters for xmp_set_player()
-	public static final int PLAYER_AMP = 0;				// Amplification factor
-	public static final int PLAYER_MIX = 1;				// Stereo mixing
-	public static final int PLAYER_INTERP = 2;			// Interpolation type
-	public static final int PLAYER_DSP = 3;				// DSP effect flags
-	public static final int PLAYER_FLAGS = 4;			// Player flags
-	public static final int PLAYER_CFLAGS = 5;			// Player flags for current module
-	public static final int PLAYER_SMPCTL = 6;			// Sample control flags
-	public static final int PLAYER_VOLUME = 7;			// Player module volume
-	public static final int PLAYER_STATE = 8;			// Internal player state
-	public static final int PLAYER_SMIX_VOLUME = 9;		// SMIX volume
+	static final int PLAYER_AMP = 0;					// Amplification factor
+	static final int PLAYER_MIX = 1;					// Stereo mixing
+	static final int PLAYER_INTERP = 2;					// Interpolation type
+	static final int PLAYER_DSP = 3;					// DSP effect flags
+	static final int PLAYER_FLAGS = 4;					// Player flags
+	static final int PLAYER_CFLAGS = 5;					// Player flags for current module
+	static final int PLAYER_SMPCTL = 6;					// Sample control flags
+	static final int PLAYER_VOLUME = 7;					// Player module volume
+	static final int PLAYER_STATE = 8;					// Internal player state
+	static final int PLAYER_SMIX_VOLUME = 9;			// SMIX volume
 
 	// interpolation types
 	public static final int INTERP_NEAREST = 0;			// Nearest neighbor
@@ -84,9 +84,18 @@ public final class Xmp {
 
 	// error codes
 	public static final int ERROR_INTERNAL = 2;
+	public static final int ERROR_FORMAT = 3;
+	public static final int ERROR_LOAD = 4;
 	public static final int ERROR_SYSTEM = 6;
 	public static final int ERROR_INVALID = 7;
 	public static final int ERROR_STATE = 8;
+
+	public static final int PERIOD_BASE = 6847;			// C4 period
+
+	public static final int SAMPLE_16BIT = 1 << 0;		// 16bit sample
+	public static final int SAMPLE_LOOP = 1 << 1;		// Sample is looped
+	public static final int SAMPLE_LOOP_BIDIR = 1 << 2;	// Bidirectional sample loop
+	public static final int SAMPLE_LOOP_FULL = 1 << 4;	// Play full sample before looping
 
 
 	static final String[] errorString = {
@@ -99,6 +108,10 @@ public final class Xmp {
 		"System error",
 		"Invalid parameter"
 	};
+
+	private Xmp() {
+
+	}
 
 	// native API methods
 	native static long createContext();
@@ -143,9 +156,4 @@ public final class Xmp {
 	static {
 		System.loadLibrary("coremod-jni");
 	}
-	
-	private Xmp() {
-		
-	}
-
 }

@@ -22,6 +22,7 @@
 
 package org.helllabs.coremod;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 
@@ -30,6 +31,7 @@ public class Player {
 	private final int samplingRate;
 	private final int mode;
 	private final long ctx;
+	private Module module;
 
 	public static class Callback {
 		public boolean callback(final FrameInfo info, final Object args) {
@@ -53,12 +55,44 @@ public class Player {
 
 	@Override
 	protected void finalize() throws Throwable {
+		if (module != null) {
+			releaseModule();
+		}
 		Xmp.freeContext(ctx);
 		super.finalize();
 	}
 
 	long getContext() {
 		return ctx;
+	}
+	
+	/**
+	 * Load a module into this player context
+	 * 
+	 * @param path Pathname to the module file to load,
+	 * @return The module just loaded.
+	 * @throws IOException
+	 */
+	public Module loadModule(final String path) throws IOException {
+		final int code = Xmp.loadModule(ctx, path);
+		if (code < 0) {
+			throw new IOException(Xmp.errorString[-code]);
+		}
+		
+		module = new Module(this);
+
+		return module;
+	}
+	
+	/**
+	 * Release memory allocated by a module in this player context.
+	 * 
+	 * @return The player object.
+	 */
+	public Player releaseModule() {
+		Xmp.releaseModule(ctx);
+		module = null;
+		return this;
 	}
 
 	/**
@@ -69,16 +103,18 @@ public class Player {
 	public Player start() {
 		final int code = Xmp.startPlayer(ctx, samplingRate, mode);
 		switch (code) {
+		case 0:
+			// We're good
+			break;
+		case -Xmp.ERROR_SYSTEM:
 		case -Xmp.ERROR_INTERNAL:
 			throw new RuntimeException(Xmp.errorString[-code]);
 		case -Xmp.ERROR_INVALID:
 			throw new IllegalArgumentException("Invalid sampling rate " + samplingRate + "Hz");
-		case -Xmp.ERROR_SYSTEM:
-			break;
-
-			// What do do if no module loaded?
-
-
+		case -Xmp.ERROR_STATE:
+			throw new IllegalStateException("Invalid player state");
+		default:
+			throw new RuntimeException("Unknown load error code " + code);
 		}
 
 		return this;
@@ -94,27 +130,97 @@ public class Player {
 		return this;
 	}
 
-	/**
-	 * Set player parameter with the specified value.
-	 * 
-	 * @param param The player parameter to set.
-	 * @param value The value to set.
-	 */
-	public void set(final int param, final int value) {
-		final int code = Xmp.setPlayer(ctx, param, value);
-		if (code == Xmp.ERROR_INVALID) {
-			throw new IllegalArgumentException("Invalid value " + value);
-		}
+	/* Player parameters */
+	
+	public int getAmplificationFactor() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_AMP);
+	}
+	
+	public int getMixing() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_MIX);
+	}
+	
+	public int getInterpolation() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_INTERP);
+	}
+	
+	public int getDSPEffectFlags() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_DSP);
+	}
+	
+	public int getFlags() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_FLAGS);
+	}
+	
+	public int getCurrentModuleFlags() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_CFLAGS);
+	}
+	
+	public int getSampleControlFlags() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_SMPCTL);
+	}
+	
+	public int getVolume() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_VOLUME);
+	}
+	
+	public int getState() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_STATE);
+	}
+	
+	public int getSampleMixerVolume() {
+		return Xmp.getPlayer(ctx, Xmp.PLAYER_SMIX_VOLUME);
 	}
 
-	/**
-	 * Retrieve current value of the specified player parameter.
-	 * 
-	 * @param param The player parameter to get.
-	 * @return The parameter value.
-	 */
-	public int get(final int param) {
-		return Xmp.getPlayer(ctx, param);
+	static private void checkParameterSet(int code) {
+		switch (code) {
+		case -Xmp.ERROR_INVALID:
+			throw new IllegalArgumentException();
+		case -Xmp.ERROR_STATE:
+			throw new IllegalStateException();
+		default:
+			break;
+		}
+	}
+	
+	public void setAmplificationFactor(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_AMP, val));
+	}
+	
+	public void setMixing(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_MIX, val));
+	}
+	
+	public void setvoiderpolation(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_INTERP, val));
+	}
+	
+	public void setDSPEffectFlags(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_DSP, val));
+	}
+	
+	public void setFlags(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_FLAGS, val));
+	}
+	
+	public void setCurrentModuleFlags(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_CFLAGS, val));
+	}
+	
+	public void setSampleControlFlags(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_SMPCTL, val));
+	}
+	
+	public void setVolume(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_VOLUME, val));
+	}
+	
+	public void setState(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_STATE, val));
+	}
+	
+	public void setSampleMixerVolume(final int val) {
+		checkParameterSet(Xmp.setPlayer(ctx, Xmp.PLAYER_SMIX_VOLUME, val));
 	}
 
 	/**
@@ -227,7 +333,7 @@ public class Player {
 	 */
 	public boolean playFrame(final FrameInfo info) {		
 		final int ret = Xmp.playFrame(ctx);
-		frameInfo(info);
+		getFrameInfo(info);
 		return ret == 0;
 	}
 
@@ -256,12 +362,10 @@ public class Player {
 	 * @param info Frame information will be written in this object.
 	 * @return Current frame information.
 	 */
-	public FrameInfo frameInfo(FrameInfo info) {
-		if (info == null) {
-			info = new FrameInfo();
-		}
-		Xmp.getFrameInfo(ctx, info);
-		return info;
+	public FrameInfo getFrameInfo(final FrameInfo info) {
+		final FrameInfo frameInfo = info == null ? new FrameInfo() : info;
+		Xmp.getFrameInfo(ctx, frameInfo);
+		return frameInfo;
 	}
 
 	/**
@@ -288,7 +392,8 @@ public class Player {
 	 * Mute or unmute the specified channel.
 	 * 
 	 * @param chn The channel to mute or unmute.
-	 * @param status 0 to mute channel, 1 to unmute or -1 to query the current channel status.
+	 * @param status 0 to mute channel, 1 to unmute or -1 to query the
+	 *   current channel status.
 	 * @return The previous channel status
 	 */
 	public int channelMute(final int chn, final int status) {
@@ -299,7 +404,8 @@ public class Player {
 	 * Set or retrieve the volume of the specified channel.
 	 *  
 	 * @param chn The channel to set or get volume.
-	 * @param vol A value from 0-100 to set the channel volume, or -1 to retrieve the current volume.
+	 * @param vol A value from 0-100 to set the channel volume, or -1 to
+	 *   retrieve the current volume.
 	 * @return The previous channel volume.
 	 */
 	public int channelVol(final int chn, final int vol) {
@@ -313,5 +419,18 @@ public class Player {
 	 */
 	public int getSamplingRate() {
 		return samplingRate;
+	}
+
+	/**
+	 * Get the currently loaded module.
+	 *
+	 * @return The loaded module, or null if no module is currently loaded.
+	 */
+	public Module getModule() {
+		return module;
+	}
+
+	public int getMode() {
+		return mode;
 	}
 }
